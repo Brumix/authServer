@@ -12,7 +12,7 @@ type JWTService interface {
 	ValidateToken(token string) (*jwt.Token, error)
 }
 type authCustomClaims struct {
-	Name     string `json:"name"`
+	Email    string `json:"email"`
 	UserName string `json:"user_name"`
 	jwt.StandardClaims
 }

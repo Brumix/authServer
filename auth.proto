@@ -44,7 +44,7 @@ message DeleteUserRequest{
 service AuthService{
   rpc Register(RegisterRequest) returns (StatusResponse){}
   rpc Login(LoginRequest) returns (LoginResponse){}
-  rpc ValidateToken(validateRequest) returns (StatusResponse){}
+  rpc ValidateToken(validateRequest) returns (User){}
   rpc ChangePassword(ChangePasswordRequest) returns (StatusResponse) {}
   rpc DeleteUser(DeleteUserRequest) returns (StatusResponse) {}
 }

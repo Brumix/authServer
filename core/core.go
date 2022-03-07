@@ -5,6 +5,7 @@ import (
 	"authServer/repository"
 	"authServer/service"
 	"authServer/utils"
+	jwt2 "github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 )
@@ -54,14 +55,14 @@ func (s *Server) Login(ctx context.Context, request *LoginRequest) (*LoginRespon
 	return response, nil
 }
 
-func (s *Server) ValidateToken(ctx context.Context, request *ValidateRequest) (*StatusResponse, error) {
+func (s *Server) ValidateToken(ctx context.Context, request *ValidateRequest) (*User, error) {
 	log.Debug("REQUEST VALIDATE TOKEN")
 	token, err := jwt.ValidateToken(request.Token)
 	if err != nil {
-		return &StatusResponse{}, err
+		return &User{}, err
 	}
-
-	return &StatusResponse{Status: token.Valid}, nil
+	emailUser := token.Claims.(jwt2.MapClaims)
+	return &User{Username: emailUser["email"].(string)}, nil
 }
 
 func (s *Server) ChangePassword(ctx context.Context, request *ChangePasswordRequest) (*StatusResponse, error) {
