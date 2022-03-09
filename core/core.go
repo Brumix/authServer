@@ -10,8 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-type Server struct {
-}
+type Server struct{}
 
 var repo = repository.NewRepository()
 var jwt = service.NewJWTService()

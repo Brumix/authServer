@@ -42,6 +42,7 @@ func initConnection() *gorm.DB {
 
 func init() {
 	migrations()
+	seeds()
 }
 
 func migrations() {
@@ -53,6 +54,30 @@ func migrations() {
 	errors.ErrorRepository("Fail executing USER Migrations", db.AutoMigrate(&models.User{}))
 
 	log.Debug("[REPOSITORY] AutoMigration Complete!!")
+}
+
+func seeds() {
+	var db = initConnection()
+	defer func() {
+		var con, _ = db.DB()
+		con.Close()
+	}()
+	err := db.Transaction(func(tx *gorm.DB) error {
+		var user = models.User{
+			UserName: "Bruno",
+			Email:    "bruno@gmail.com",
+			Password: "123",
+		}
+		if err := tx.Create(&user).Error; err != nil {
+			errors.ErrorRepository("ERROR creating the user", err)
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		errors.ErrorRepository("ERROR CREATING THE SEEDS", err)
+	}
+
 }
 
 func (repo *RepositoryStruck) RegisterUser(user models.User) error {
