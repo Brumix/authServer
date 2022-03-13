@@ -12,8 +12,8 @@ type JWTService interface {
 	ValidateToken(token string) (*jwt.Token, error)
 }
 type authCustomClaims struct {
-	Email    string `json:"email"`
-	UserName string `json:"user_name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
 	jwt.StandardClaims
 }
 
@@ -31,10 +31,10 @@ func getSecretKey() string {
 	return secret
 }
 
-func (service *JwtServices) GenerateToken(email string, userName string) string {
+func (service *JwtServices) GenerateToken(email string, role string) string {
 	claims := &authCustomClaims{
 		email,
-		userName,
+		role,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    "Bruno Pereira",

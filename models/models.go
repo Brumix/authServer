@@ -11,6 +11,7 @@ type User struct {
 	UserName string `gorm:"unique;not null"`
 	Email    string `gorm:"unique;not null"`
 	Password string `gorm:"not null"`
+	Role     string `gorm:"not null"`
 }
 
 type ChangePass struct {

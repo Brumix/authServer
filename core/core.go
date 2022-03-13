@@ -24,6 +24,7 @@ func (s *Server) Register(ctx context.Context, request *RegisterRequest) (*Statu
 		UserName: request.Username,
 		Email:    request.Email,
 		Password: utils.HashAndSalt(request.Password),
+		Role:     request.Role,
 	}
 	err := repo.RegisterUser(newUser)
 	if err != nil {
@@ -49,7 +50,7 @@ func (s *Server) Login(ctx context.Context, request *LoginRequest) (*LoginRespon
 	user.Username = userResponse.UserName
 
 	response.User = user
-	response.Token = jwt.GenerateToken(userResponse.Email, userResponse.UserName)
+	response.Token = jwt.GenerateToken(userResponse.Email, userResponse.Role)
 
 	return response, nil
 }
@@ -60,8 +61,9 @@ func (s *Server) ValidateToken(ctx context.Context, request *ValidateRequest) (*
 	if err != nil {
 		return &User{}, err
 	}
-	emailUser := token.Claims.(jwt2.MapClaims)
-	return &User{Username: emailUser["email"].(string)}, nil
+	claims := token.Claims.(jwt2.MapClaims)
+	return &User{Username: claims["email"].(string),
+		Role: claims["role"].(string)}, nil
 }
 
 func (s *Server) ChangePassword(ctx context.Context, request *ChangePasswordRequest) (*StatusResponse, error) {

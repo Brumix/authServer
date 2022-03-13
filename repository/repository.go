@@ -67,6 +67,7 @@ func seeds() {
 			UserName: "Bruno",
 			Email:    "bruno@gmail.com",
 			Password: "123",
+			Role:     "ADMIN",
 		}
 		if err := tx.Create(&user).Error; err != nil {
 			errors.ErrorRepository("ERROR creating the user", err)

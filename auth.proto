@@ -4,12 +4,14 @@ package core;
 
 message User{
   string username = 1;
+  string role = 2;
 }
 
 message  RegisterRequest {
   string username = 1;
   string email = 2;
   string password = 3;
+  string role = 4;
 }
 
 message StatusResponse{
