@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"os"
 	"strconv"
+	"time"
 )
 
 type RepoService interface {
@@ -18,6 +19,8 @@ type RepoService interface {
 	ChangePassword(request *models.ChangePass) error
 	DeleteUser(request *models.User) error
 }
+
+var db = initConnection()
 
 type RepositoryStruck struct{}
 
@@ -36,7 +39,16 @@ func initConnection() *gorm.DB {
 	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Europe/Lisbon", host, user, password, dbname, port)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	errors.ErrorRepositoryF("Error connecting with database", err)
+	sqlDB, _ := db.DB()
 
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	sqlDB.SetMaxIdleConns(10)
+
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	sqlDB.SetMaxOpenConns(100)
+
+	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+	sqlDB.SetConnMaxLifetime(time.Hour)
 	return db
 }
 
@@ -46,22 +58,12 @@ func init() {
 }
 
 func migrations() {
-	db := initConnection()
-	defer func() {
-		var dbC, _ = db.DB()
-		errors.ErrorRepository("ERROR closing the database", dbC.Close())
-	}()
 	errors.ErrorRepository("Fail executing USER Migrations", db.AutoMigrate(&models.User{}))
 
 	log.Debug("[REPOSITORY] AutoMigration Complete!!")
 }
 
 func seeds() {
-	var db = initConnection()
-	defer func() {
-		var con, _ = db.DB()
-		con.Close()
-	}()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		var user = models.User{
 			UserName: "Bruno",
@@ -82,11 +84,6 @@ func seeds() {
 }
 
 func (repo *RepositoryStruck) RegisterUser(user models.User) error {
-	var db = initConnection()
-	defer func() {
-		var con, _ = db.DB()
-		con.Close()
-	}()
 	err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&user).Error; err != nil {
 			log.Error("[REPOSITORY] ERROR creating the user: %v", err)
@@ -102,12 +99,9 @@ func (repo *RepositoryStruck) RegisterUser(user models.User) error {
 }
 
 func (repo *RepositoryStruck) ExistUser(user *models.User) (models.User, error) {
-	var db = initConnection()
+
 	var userdb models.User
-	defer func() {
-		var con, _ = db.DB()
-		con.Close()
-	}()
+
 	err := db.Transaction(func(tx *gorm.DB) error {
 		tx.Where("email = ?", user.Email).First(&userdb)
 		return nil
@@ -124,8 +118,6 @@ func (repo *RepositoryStruck) ExistUser(user *models.User) (models.User, error) 
 }
 
 func (repo *RepositoryStruck) ChangePassword(request *models.ChangePass) error {
-
-	var db = initConnection()
 	user, err := repo.ExistUser(&models.User{Email: request.Email, Password: request.OldPassword})
 	if err != nil {
 		log.Error(err)
@@ -138,7 +130,6 @@ func (repo *RepositoryStruck) ChangePassword(request *models.ChangePass) error {
 }
 
 func (repo *RepositoryStruck) DeleteUser(request *models.User) error {
-	var db = initConnection()
 	user, err := repo.ExistUser(request)
 	if err != nil {
 		log.Error(err)
