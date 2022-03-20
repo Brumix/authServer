@@ -1,4 +1,4 @@
 CREATE
-DATABASE microservicostock;
-CREATE
 DATABASE hypermediastockapi;
+CREATE
+DATABASE microservicostock;

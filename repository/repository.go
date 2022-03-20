@@ -68,7 +68,7 @@ func seeds() {
 		var user = models.User{
 			UserName: "Bruno",
 			Email:    "bruno@gmail.com",
-			Password: "123",
+			Password: utils.HashAndSalt("123"),
 			Role:     "ADMIN",
 		}
 		if err := tx.Create(&user).Error; err != nil {
