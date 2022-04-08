@@ -37,9 +37,9 @@ func initConnection() *gorm.DB {
 	port, _ := strconv.Atoi(os.Getenv("DBPORT"))
 
 	dsn := fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Europe/Lisbon", host, user, password, dbname, port)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	dbGorm, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	errors.ErrorRepositoryF("Error connecting with database", err)
-	sqlDB, _ := db.DB()
+	sqlDB, _ := dbGorm.DB()
 
 	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
 	sqlDB.SetMaxIdleConns(10)
@@ -49,7 +49,7 @@ func initConnection() *gorm.DB {
 
 	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
 	sqlDB.SetConnMaxLifetime(time.Hour)
-	return db
+	return dbGorm
 }
 
 func init() {
